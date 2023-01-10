@@ -1,0 +1,9 @@
+http:
+  listener:
+    host: "localhost"
+    port: "9994"
+    
+  requester:
+    host: "localhost"
+    port: "9995"
+    path: "/api/booking"

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+    <http:listener-config name="transportproject-webxpapi-httpListenerConfig">
+        <http:listener-connection host="${http.listener.host}" port="${http.listener.port}" />
+    </http:listener-config>
+    <apikit:config name="transportproject-webxpapi-config" api="transportproject-webxpapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<configuration-properties doc:name="Configuration properties" doc:id="2dc57a37-64f8-4955-ab46-85e88ff3ee03" file="config\local.yaml" />
+	<configuration doc:name="Configuration" doc:id="6fe299c9-ec0c-4463-84d8-0af5545b7de0" defaultErrorHandler-ref="globalExceptionError_Handler" />
+   
+	
+
+</mule>

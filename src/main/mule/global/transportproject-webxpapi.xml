@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+ <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="cf4d018e-e654-498e-a1ba-b75ded8cd331" >
+		<http:request-connection host="${http.requester.host}" port="${http.requester.port}" />
+	</http:request-config>
+	<flow name="transportproject-webxpapi-main">
+        <http:listener config-ref="transportproject-webxpapi-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="transportproject-webxpapi-config" />
+		<error-handler ref="globalExceptionError_Handler" />
+    </flow>
+    <flow name="transportproject-webxpapi-console">
+        <http:listener config-ref="transportproject-webxpapi-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="transportproject-webxpapi-config" />
+		<error-handler ref="globalExceptionError_Handler" />
+    </flow>
+    <sub-flow name="transportproject-webxpapiSub_Flow-setVariables" doc:id="4c56ea9f-a597-46bf-a07e-7d3831c8fa06" >
+		<ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="transportType"><![CDATA[attributes.uriParams.'transportType']]></ee:set-variable>
+				<ee:set-variable variableName="transactionId"><![CDATA[%dw 2.0
+output application/java
+---
+attributes.headers.transactionId]]></ee:set-variable>
+				<ee:set-variable variableName="companyName"><![CDATA[%dw 2.0
+output application/java
+---
+if(attributes.queryParams.companyName == null) "dummy"
+else attributes.queryParams.companyName ]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+	</sub-flow>
+	<flow name="get:\booking\(transportType)\routes:transportproject-webxpapi-config">
+        <flow-ref doc:name="Flow Reference initialise variable" doc:id="7040ea80-9847-4eb6-a94d-ac057820a421" name="transportproject-webxpapiSub_Flow-setVariables"/>
+		<http:request method="GET" doc:name="Request BAPI for route" doc:id="5053510b-05c2-4761-a1e4-326b7fd13a25" config-ref="HTTP_Request_configuration" path="#[p('http.requester.path') ++ &quot;/&quot; ++ vars.transportType ++ &quot;/routes&quot;]" responseTimeout="1000000">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"transactionId" : vars.transactionId
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"companyName" : vars.companyName
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="get:\booking\(transportType)\schedules:transportproject-webxpapi-config">
+        <flow-ref doc:name="Flow Reference initialisation" doc:id="f66348cb-1615-499a-9dee-f1bc1e49ef5b" name="transportproject-webxpapiSub_Flow-setVariables"/>
+		<http:request method="GET" doc:name="Request BaAPI for Schedules" doc:id="2c568b94-1ccf-4b45-82f0-de74e97c0e4d" config-ref="HTTP_Request_configuration" path="#[p('http.requester.path') ++ &quot;/&quot; ++ vars.transportType ++ &quot;/schedules&quot;]" responseTimeout="100000000">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"transactionId" : vars.transactionId
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"companyName" : vars.companyName
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+</mule>

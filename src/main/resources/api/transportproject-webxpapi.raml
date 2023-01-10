@@ -1,0 +1,75 @@
+#%RAML 1.0
+title: TransportProject-WebXPAPI
+uses:
+  common: /libraries/common/commonLibraryForUse.raml
+
+types:
+  getRouteSuccessResponse: !include /libraries/routes/dataTpe/getRoute-200SuccessResponse-dataType.raml
+  getScheduleSuccessResponse: !include /libraries/schedule/dataType/getSchedule200SuccessDataType.raml
+  responseDataType400: !include /libraries/common/dataType/400-Response-dataType.raml
+  responseDataType404: !include /libraries/common/dataType/404-Response-dataType.raml
+  responseDataType500: !include /libraries/common/dataType/500-Response-dataType.raml
+
+description: This raml file is designed for Web experience API
+
+/booking:
+  /{transportType}:
+    /routes:
+      get:
+        is:
+          - common.transactionId
+          - common.companyName
+          - common.departureLocation
+          - common.destinationLocation
+        responses:
+          "200":
+            description: "success scenario response"
+            body:
+              application/json:
+                type: getRouteSuccessResponse
+                example: !include /libraries/routes/examples/200SuccessResponseForGetRouteExample.json
+                
+          "400":
+            body:
+              application/json:
+                type: responseDataType400
+                example: !include /libraries/common/examples/400ResponseExample.json
+          "404":
+            body:
+              application/json:
+                type: responseDataType404
+                example: !include /libraries/common/examples/404ResponseExample.json
+          "500":
+            body:
+              application/json:
+                type: responseDataType500
+                example: !include /libraries/common/examples/500ResponseExample.json
+    /schedules:
+      get:
+        is:
+          - common.transactionId
+          - common.companyName
+          - common.departureLocation
+          - common.destinationLocation
+          - common.requestTimeZone
+        responses:
+          200:
+            body:
+              application/json:
+                type: getScheduleSuccessResponse
+                example: !include /libraries/schedule/examples/200SuccessResponseForGetScheduleExample.json
+          "400":
+            body:
+              application/json:
+                type: responseDataType400
+                example: !include /libraries/common/examples/400ResponseExample.json
+          "404":
+            body:
+              application/json:
+                type: responseDataType404
+                example: !include /libraries/common/examples/404ResponseExample.json
+          "500":
+            body:
+              application/json:
+                type: responseDataType500
+                example:  !include /libraries/common/examples/500ResponseExample.json    
